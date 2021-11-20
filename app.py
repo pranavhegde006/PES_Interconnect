@@ -5,9 +5,12 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
+select_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':['teacher', 'section', 'tutors']}
+
 @app.route('/')
 def login_page():
-    return render_template('index.html')
+    return render_template('login.html')
+
 
 @app.route('/', methods=['POST'])
 def login():
@@ -20,19 +23,49 @@ def login():
         conn = psycopg2.connect(dbname = DB_NAME, user = DB_USER, password = DB_PASSWORD, host = DB_HOST)
         return redirect('/home')
     except:
-        return render_template('error.html')
+        return render_template('error.html', Error = "User credentials don't match")
 
+
+@app.route('/home', methods=['POST'])
+def get_table_name():
+    return render_template('index.html')
 
 
 @app.route('/home', methods=['GET'])
 def index():
-    # try:
-    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    s = "SELECT * FROM student"
-    cur.execute(s)
-    rows = cur.fetchall()
+    return render_template('home.html')
 
-    return rows[0]
+
+@app.route('/select', methods=['GET'])
+def get_select():
+    return render_template('select.html')
+
+
+@app.route('/select', methods=['POST'])
+def select():
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        relation = request.form['relation']
+        s = "SELECT USER"
+        cur.execute(s)
+        rows = cur.fetchall()
+        cur_user = rows[0]['user']
+        if(relation not in select_perms[cur_user]):
+            return render_template('error.html', Error = 'Unauthorized access')
+
+        s = "SELECT * FROM " + relation
+        cur.execute(s)
+        rows = cur.fetchall()
+        s = "SELECT column_name FROM information_schema.columns WHERE table_name = '" + relation + "'"
+        cur.execute(s)
+        heading = cur.fetchall()
+        headings = []
+        for i in heading:
+            headings.append(i[0])
+        return render_template('table.html', headings = headings, data = rows)
+
+    except Exception as e:
+        return render_template('error.html', Error = str(e))
 
 
 

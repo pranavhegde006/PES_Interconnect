@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>PES Interconnect</title>
+</head>
+<body>
+    <form action='/select' method="POST">
+        <label id="label" for="relation">Playback speed:</label>
+        <select id="relation" name="relation" value='{{ selection }}'>
+            <option {{ "selected='selected'" if selection == 'student'    else "" }} value='student'   > Student   </option>
+            <option {{ "selected='selected'" if selection == 'teacher' else "" }} value='teacher'> Teacher   </option>
+            <option {{ "selected='selected'" if selection == 'staff'  else "" }} value='staff' > Staff     </option>
+            <option {{ "selected='selected'" if selection == 'club' else "" }} value='club'> Club      </option>
+            <option {{ "selected='selected'" if selection == 'department'    else "" }} value='department'   > Department</option>
+            <option {{ "selected='selected'" if selection == 'course'    else "" }} value='course'   > Course    </option>
+        </select> 
+        </br>
+        <button type="submit" class='button'>Get table!</button>
+    </form>
+</body>
+</html>
