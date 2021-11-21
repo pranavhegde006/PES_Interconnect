@@ -12,6 +12,47 @@
     <br/>
     <a href="/update">Update row</a>
     <br/>
+    <br/>
+
+    <form action='/get_top_students' method="POST">
+        <label id = "label" for="percent">Enter the percentage of top students you want to view: </label>
+        <input type="number" name="percent"><br/>
+        <button type="submit" class="button">Get List!</button>
+    </form>
+
+    <br/> <br/>
+
+    <form action='/no_course_teachers' method="POST">
+        <button type="submit" class="button">Get teachers who are not teaching any course!</button>
+    </form>
+
+    <br/> <br/>
+
+    <form action='/teachers_dept' method="POST">
+        <label id = "label" for="dept">Enter the department to view its teachers: </label>
+        <input type="text" name="dept"><br/>
+        <button type="submit" class="button">Get teachers' list</button>
+    </form>
+
+
+    <br/>
+    <h2>
+        {{table}}
+    </h2>
+    <table>
+        <tr>
+            {% for header in headings %}
+            <th>{{ header }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data %}
+        <tr>
+            {% for cell in row %}
+            <td> {{ cell }} </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
 
 </body>
 </html>

@@ -154,7 +154,7 @@ def insert_data():
         s = "COMMIT"
         cur.execute(s)
         print(c_id, name)
-        return name
+        return render_template('insert.html')
     except Exception as E:
         return render_template('error.html', Error = str(E))
     
@@ -220,6 +220,81 @@ def update_cgpa():
 
     except Exception as e:
         return render_template('error.html', Error = str(e))
+
+
+@app.route('/get_top_students', methods=['POST'])
+def get_top_students():
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        percent = request.form['percent']
+        s = "BEGIN"
+        cur.execute(s)
+        s = "SELECT USER"
+        relation = "student"
+        cur.execute(s)
+        rows = cur.fetchall()
+        cur_user = rows[0]['user']
+        if(relation not in select_perms[cur_user]):
+            return render_template('error.html', Error = 'Unauthorized access')
+        s = "select srn,name,cgpa from student order by cgpa desc fetch first ( select count(*) * " + percent + "/100 from student ) rows only"
+        cur.execute(s)
+        rows = cur.fetchall()
+        s = "COMMIT"
+        cur.execute(s)
+        return render_template('home.html', table = "Top " + str(percent) + "% of students", data=rows, headings = ['srn', 'name', 'cgpa'])
+
+    except Exception as e:
+        return render_template('error.html', Error = str(e))
+
+
+@app.route('/no_course_teachers', methods = ["POST"])
+def no_course_teachers():
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = "BEGIN"
+        cur.execute(s)
+        s = "SELECT USER"
+        relation = "teacher"
+        cur.execute(s)
+        rows = cur.fetchall()
+        cur_user = rows[0]['user']
+        if(relation not in select_perms[cur_user]):
+            return render_template('error.html', Error = 'Unauthorized access')
+        s = "select employee_id, name , email_id from teacher as u where not exists (select * from teaches as t where t.employee_id=u.employee_id)"
+        cur.execute(s)
+        rows = cur.fetchall()
+        s = "COMMIT"
+        cur.execute(s)
+        return render_template('home.html', table = "Teachers who are currently not teaching any course", data=rows, headings = ['Employee ID', 'Name', 'Email ID'])
+
+    except Exception as e:
+        return render_template('error.html', Error = str(e))
+
+
+@app.route('/teachers_dept', methods=["POST"])
+def get_teachers():
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = "BEGIN"
+        cur.execute(s)
+        s = "SELECT USER"
+        relation = "teacher"
+        cur.execute(s)
+        rows = cur.fetchall()
+        cur_user = rows[0]['user']
+        if(relation not in select_perms[cur_user]):
+            return render_template('error.html', Error = 'Unauthorized access')
+        dept = request.form['dept']
+        s = "select name , phone_no,email_id from teacher where employee_id in (select employee_id from teaches where dept_id in (select dept_id from department where name='" + dept + "'))"
+        cur.execute(s)
+        rows = cur.fetchall()
+        s = "COMMIT"
+        cur.execute(s)
+        return render_template('home.html', table = "Teachers who are currently not teaching any course", data=rows, headings = ['Name', 'Phone No', 'Email ID'])
+
+    except Exception as e:
+        return render_template('error.html', Error = str(e))
+
 
 
 if __name__ == '__main__':
