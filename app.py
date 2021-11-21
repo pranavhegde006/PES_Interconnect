@@ -7,10 +7,10 @@ app = Flask(__name__)
 CORS(app)
 
 
-select_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':['teacher', 'section', 'tutors']}
-delete_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':['teacher', 'section', 'tutors']}
-insert_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':['teacher', 'section', 'tutors']}
-update_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':['teacher', 'section', 'tutors']}
+select_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'admin':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':['department', 'section', 'course'], 'teacher':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors']}
+delete_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'admin':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':[]}
+insert_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'admin':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':[]}
+update_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'admin':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':[]}
 
 
 @app.route('/')
