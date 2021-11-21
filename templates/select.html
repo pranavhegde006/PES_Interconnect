@@ -5,7 +5,7 @@
 </head>
 <body>
     <form action='/select' method="POST">
-        <label id="label" for="relation">Playback speed:</label>
+        <label id="label" for="relation">Select table: </label>
         <select id="relation" name="relation" value='{{ selection }}'>
             <option {{ "selected='selected'" if selection == 'student'    else "" }} value='student'   > Student   </option>
             <option {{ "selected='selected'" if selection == 'teacher' else "" }} value='teacher'> Teacher   </option>

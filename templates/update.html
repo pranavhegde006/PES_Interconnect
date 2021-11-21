@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>PES Interconnect</title>
+</head>
+<body>
+    <form action='/get_cgpa' method="POST">
+        <label id="label" for="srn">SRN: </label>
+        <input type="text" name="srn"><br/>
+        <button type="submit" class='button'>Get student details!</button>
+    </form>
+    <br/>
+    <h2>
+        {{table}}
+    </h2>
+    <table>
+        <tr>
+            {% for header in headings %}
+            <th>{{ header }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data %}
+        <tr>
+            {% for cell in row %}
+            <td> {{ cell }} </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <br/>
+    <br/>
+    <form action='/update_cgpa' method="POST">
+        <label id = "label" for="srn">SRN: </label>
+        <input type="number" name="srn"><br/>
+        <label id="label" for="new_cgpa">Updated CGPA: </label>
+        <input type="text" name="new_cgpa"><br/>
+        <button type="submit" class="button">Update CGPA</button>
+    </form>
+</body>
+</html>
