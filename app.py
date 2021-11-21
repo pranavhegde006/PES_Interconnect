@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 select_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':['teacher', 'section', 'tutors']}
+delete_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':['teacher', 'section', 'tutors']}
 
 @app.route('/')
 def login_page():
@@ -62,11 +63,47 @@ def select():
         headings = []
         for i in heading:
             headings.append(i[0])
-        return render_template('table.html', headings = headings, data = rows)
+        return render_template('select.html', table = relation, headings = headings, data = rows)
 
     except Exception as e:
         return render_template('error.html', Error = str(e))
 
+
+@app.route('/delete')
+def deletePage():
+    return render_template('delete.html')
+
+
+@app.route('/delete', methods = ['POST'])
+def delete():
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        relation = request.form['relation']
+        s = "SELECT USER"
+        cur.execute(s)
+        rows = cur.fetchall()
+        cur_user = rows[0]['user']
+        if(relation not in delete_perms[cur_user]):
+            return render_template('error.html', Error = 'Unauthorized access')
+
+        s = "SELECT * FROM " + relation
+        cur.execute(s)
+        rows = cur.fetchall()
+        s = "SELECT column_name FROM information_schema.columns WHERE table_name = '" + relation + "'"
+        cur.execute(s)
+        heading = cur.fetchall()
+        headings = []
+        for i in heading:
+            headings.append(i[0])
+        return render_template('delete.html', table = relation, headings = headings, data = rows)
+
+    except Exception as e:
+        return render_template('error.html', Error = str(e))
+
+
+@app.route('/dele', methods=['POST'])
+def dele():
+    print('yes')
 
 
 if __name__ == '__main__':

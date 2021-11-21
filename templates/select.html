@@ -17,5 +17,25 @@
         </br>
         <button type="submit" class='button'>Get table!</button>
     </form>
+
+    <br/>
+    <h2>
+        {{table}}
+    </h2>
+    <table>
+        <tr>
+            {% for header in headings %}
+            <th>{{ header }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data %}
+        <tr>
+            {% for cell in row %}
+            <td> {{ cell }} </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    
 </body>
 </html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>PES Interconnect</title>
+    <script>
+        function delete1(id) {
+          console.log(id);
+            
+
+          fetch('http://localhost:5000/dele', {
+            method: 'POST',
+            headers: {
+                // 'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json; charset=UTF-8'
+            },
+            body: JSON.stringify({ids: id})
+            }).then(res => res.json())
+            .then(res => console.log(res));
+        }
+    </script>
+</head>
+<body>
+    <form action='/delete' method="POST">
+        <label id="label" for="relation">Playback speed:</label>
+        <select id="relation" name="relation" value='{{ selection }}'>
+            <!-- <option {{ "selected='selected'" if selection == 'student'    else "" }} value='student'   > Student   </option> -->
+            <option {{ "selected='selected'" if selection == 'consists' else "" }} value='consists'> Consits   </option>
+            <!-- <option {{ "selected='selected'" if selection == 'teaches'  else "" }} value='teaches' > Teaches     </option> -->
+            <!-- <option {{ "selected='selected'" if selection == 'opts' else "" }} value='opts'> Opts      </option> -->
+            <!-- <option {{ "selected='selected'" if selection == 'offers'    else "" }} value='offers'   > Offers</option> -->
+            <!-- <option {{ "selected='selected'" if selection == 'tutors'    else "" }} value='tutors'   > Tutors    </option> -->
+            <!-- <option {{ "selected='selected'" if selection == 'managed_by'    else "" }} value='managed_by'   > Managed by    </option> -->
+        </select> 
+        </br>
+        <button type="submit" class='button'>Get table!</button>
+    </form>
+
+    <br/>
+    <h2>
+        {{ table }}
+    </h2>
+
+    <table>
+        <tr>
+            {% for header in headings %}
+            <th>{{ header }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data %}
+        <tr>
+            {% for cell in row %}
+            <td> {{ cell }} </td>
+            {% endfor %}
+            <button id={{ data.index(row) }} onclick="delete1(this.id)">Delete</button>
+        </tr>
+        {% endfor %}
+    </table>
+    
+</body>
+</html>
