@@ -7,12 +7,6 @@ app = Flask(__name__)
 CORS(app)
 
 
-select_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'admin':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':['department', 'section', 'course'], 'teacher':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors']}
-delete_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'admin':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':[]}
-insert_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'admin':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':[]}
-update_perms = {'postgres':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'admin':['club', 'consists', 'course', 'department', 'managed_by', 'offers', 'opts', 'section', 'staff', 'student', 'teacher', 'teaches', 'tutors'], 'student':[], 'teacher':[]}
-
-
 @app.route('/')
 def login_page():
     return render_template('login.html')
@@ -30,6 +24,21 @@ def login():
         return redirect('/home')
     except:
         return render_template('error.html', Error = "User credentials don't match")
+
+
+def can(user, table, privilege):
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if(table == '' and user == 'admin' or user == 'postgres'):
+        return True
+    s = "select privilege_type from information_schema.role_table_grants where grantee = '" + user + "' and table_name = '" + table + "'"
+    cur.execute(s)
+    rows = cur.fetchall()
+    perms = []
+    for i in rows:
+        perms.append(i[0])
+    if(privilege in perms):
+        return True
+    return False
 
 
 @app.route('/home', methods=['POST'])
@@ -56,7 +65,7 @@ def select():
         cur.execute(s)
         rows = cur.fetchall()
         cur_user = rows[0]['user']
-        if(relation not in select_perms[cur_user]):
+        if(not can(cur_user, relation, 'SELECT')):
             return render_template('error.html', Error = 'Unauthorized access')
 
         s = "SELECT * FROM " + relation
@@ -88,7 +97,7 @@ def delete():
         cur.execute(s)
         rows = cur.fetchall()
         cur_user = rows[0]['user']
-        if(relation not in delete_perms[cur_user]):
+        if(not can(cur_user, relation, "DELETE")):
             return render_template('error.html', Error = 'Unauthorized access')
 
         s = "SELECT * FROM " + relation
@@ -115,9 +124,16 @@ def dele():
         s = "SELECT * FROM consists"
         cur.execute(s)
         rows = cur.fetchall()
-        # print(type(rows))
         c_id = rows[int(id['ids'])][0]
         srn = rows[int(id['ids'])][1]
+        relation = "consists"
+        s = "SELECT USER"
+        cur.execute(s)
+        rows = cur.fetchall()
+        cur_user = rows[0]['user']
+        
+        if(not can(cur_user, relation, "DELETE")):
+            return render_template('error.html', Error = 'Unauthorized access')
         s = "BEGIN"
         cur.execute(s)
         s = "DELETE FROM consists WHERE club_id = " + str(c_id) + " AND srn = " + str(srn)
@@ -145,7 +161,7 @@ def insert_data():
         cur.execute(s)
         rows = cur.fetchall()
         cur_user = rows[0]['user']
-        if(relation not in select_perms[cur_user]):
+        if(not can(cur_user, relation, "INSERT")):
             return render_template('error.html', Error = 'Unauthorized access')
         s = "BEGIN"
         cur.execute(s)
@@ -153,7 +169,6 @@ def insert_data():
         cur.execute(s)
         s = "COMMIT"
         cur.execute(s)
-        print(c_id, name)
         return render_template('insert.html')
     except Exception as E:
         return render_template('error.html', Error = str(E))
@@ -176,7 +191,7 @@ def show_cgpa():
         cur.execute(s)
         rows = cur.fetchall()
         cur_user = rows[0]['user']
-        if(relation not in update_perms[cur_user]):
+        if(not can(cur_user, relation, "UPDATE")):
             return render_template('error.html', Error = 'Unauthorized access')
 
         s = "SELECT srn, name, cgpa FROM student where srn = " + str(srn)
@@ -208,7 +223,7 @@ def update_cgpa():
         cur.execute(s)
         rows = cur.fetchall()
         cur_user = rows[0]['user']
-        if(relation not in update_perms[cur_user]):
+        if(not can(cur_user, relation, "UPDATE")):
             return render_template('error.html', Error = 'Unauthorized access')
         new_cgpa = request.form['new_cgpa']
         srn = request.form['srn']
@@ -234,7 +249,7 @@ def get_top_students():
         cur.execute(s)
         rows = cur.fetchall()
         cur_user = rows[0]['user']
-        if(relation not in select_perms[cur_user]):
+        if(not can(cur_user, relation, "SELECT")):
             return render_template('error.html', Error = 'Unauthorized access')
         s = "select srn,name,cgpa from student order by cgpa desc fetch first ( select count(*) * " + percent + "/100 from student ) rows only"
         cur.execute(s)
@@ -258,7 +273,7 @@ def no_course_teachers():
         cur.execute(s)
         rows = cur.fetchall()
         cur_user = rows[0]['user']
-        if(relation not in select_perms[cur_user]):
+        if(not can(cur_user, relation, "SELECT")):
             return render_template('error.html', Error = 'Unauthorized access')
         s = "select employee_id, name , email_id from teacher as u where not exists (select * from teaches as t where t.employee_id=u.employee_id)"
         cur.execute(s)
@@ -282,7 +297,7 @@ def get_teachers():
         cur.execute(s)
         rows = cur.fetchall()
         cur_user = rows[0]['user']
-        if(relation not in select_perms[cur_user]):
+        if(not can(cur_user, relation, "SELECT")):
             return render_template('error.html', Error = 'Unauthorized access')
         dept = request.form['dept']
         s = "select name , phone_no,email_id from teacher where employee_id in (select employee_id from teaches where dept_id in (select dept_id from department where name='" + dept + "'))"
@@ -291,6 +306,30 @@ def get_teachers():
         s = "COMMIT"
         cur.execute(s)
         return render_template('home.html', table = "Teachers who are currently not teaching any course", data=rows, headings = ['Name', 'Phone No', 'Email ID'])
+
+    except Exception as e:
+        return render_template('error.html', Error = str(e))
+
+
+@app.route('/query', methods = ['POST'])
+def execute_query():
+    try:
+        query = request.form['query']
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = "BEGIN"
+        cur.execute(s)
+        s = "SELECT USER"
+        cur.execute(s)
+        rows = cur.fetchall()
+        cur_user = rows[0]['user']
+        if(not can(cur_user, "", "SELECT")):
+            return render_template('error.html', Error = 'Unauthorized access')
+        s = query
+        cur.execute(s)
+        rows = cur.fetchall()
+        s = "COMMIT"
+        cur.execute(s)
+        return render_template('home.html', data=rows)
 
     except Exception as e:
         return render_template('error.html', Error = str(e))
