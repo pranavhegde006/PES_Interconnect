@@ -3,7 +3,7 @@ A University database with minimal yet fully functional frontend, built as a par
 
 ## Steps to run the app locally:
 - Clone the repo
-- Run `ddl.sql` and `insert.sql` in PostgreSQL shell
+- Run `/db/ddl.sql` and `/db/insert.sql` in PostgreSQL shell
 - Run `pip install -r requirements.txt`
 - Run `python app.py`
 
