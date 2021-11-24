@@ -1,5 +1,5 @@
 # PES Interconnect
-A University database with minimal yet fully functional frontend as a part of the UE19CS301 - Database Management System course at PES University.
+A University database with minimal yet fully functional frontend, built as a part of the `UE19CS301 - Database Management System` course at PES University.
 
 ## Steps to run the app locally:
 - Clone the repo
